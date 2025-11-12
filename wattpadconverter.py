@@ -14,6 +14,8 @@ apiV2_url = "https://www.wattpad.com/apiv2/"
 api_V3_url = "https://www.wattpad.com/apiv3/"
 error_message = "ERROR:check the url, for valid id"
 
+url = "https://www.wattpad.com/story/379621254-inevitable-fate-18%2B-gxg"
+
 def get_chapter_id(url):
     search_id = re.compile(r'\d{5,}')
     id_match = search_id.search(url)
@@ -85,7 +87,7 @@ def save_html(file_name, story_title, author, cover, tags, chapters, description
             file.close()
             print(f"saved {file_name}")
 
-def save_epub_file(html_file, story_title, cover):
+def save_epub(html_file, story_title, cover):
     print("saving EPUB...")
     story_title = story_title.replace('/', ' ')
     cover_image = f"{story_title}.jpg"
@@ -127,3 +129,22 @@ def main(url):
     except Exception as exc:
         print(f"Error retrieving JSON data from the API: {exc}")
         return
+
+    story_title, author, cover, tags, chapters, description = extract_data(json_data)
+    
+    html_file_name = f"{story_title}.html"
+    html_file_name = html_file_name.replace('/', ' ')
+    save_html(html_file_name, story_title, author, cover, tags, chapters, description)
+    save_epub(html_file_name, story_title, cover)
+    
+    if __name__ == "__main__":
+        parser = argparse.ArgumentParser(description='Wattpad2epub: Convert Wattpad stories to EPUB format.')
+        parser.add_argument('url', nargs='?', help='URL of the Wattpad Story')
+        args = parser.parse_args()
+
+    if args.url:
+        main(args.url)
+    else:
+        # Getting address from clipboard.
+        url = pyperclip.paste()
+        main(url)
